@@ -29,9 +29,9 @@ def load_data():
     return df
 
 
-def make_tags(review):
+def make_tags(review, key):
 
-    chat = ChatOpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
+    chat = ChatOpenAI(openai_api_key=key)
 
     template = "A tagging system that creates tags for use in an online shopping mall."
     system_message_prompt = SystemMessagePromptTemplate.from_template(template)
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         openai.api_key = openai_api_key
         df = load_data()
         with st.spinner("Making tags..."):
-            df['tags'] = df.apply(lambda x: make_tags(x["reviewText"]), axis=1)
+            df['tags'] = df.apply(lambda x: make_tags(x["reviewText"], openai_api_key), axis=1)
             df.to_csv("./data/AMAZON_FASHION_TAGS.csv", index=False)
     
     else:

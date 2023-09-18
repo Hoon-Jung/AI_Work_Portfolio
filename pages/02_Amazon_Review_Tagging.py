@@ -6,8 +6,8 @@ from langchain import LLMChain
 from tqdm import tqdm
 import os
 import ast
-
 import streamlit as st
+import openai
 
 from langchain.prompts.chat import (
     ChatPromptTemplate,
@@ -16,10 +16,10 @@ from langchain.prompts.chat import (
 
 )
 
-
+@st.cache_data
 def load_data():
 
-    data_path = "./AMAZON_FASHION.json/AMAZON_FASHION.json"
+    data_path = "./data/AMAZON_FASHION.json"
 
     with open(data_path, "r") as f:
         data = [json.loads(line) for line in f]
@@ -56,11 +56,25 @@ def str_to_list(strings):
 
 
 if __name__ == "__main__":
-    df = load_data()
-    st.write(df)
+    api_key_input = st.text_input("Enter OpenAI API Key", type="password", value=os.getenv("OPENAI_API_KEY") or st.session_state.get("OPENAI_API_KEY", ""))
+    api_key_button = st.button("Add")
+    if api_key_button:
+        st.session_state["OPENAI_API_KEY"] = api_key_input
+
+    openai_api_key = st.session_state.get("OPENAI_API_KEY")
+    if openai_api_key:
+        openai.api_key = openai_api_key
+        df = load_data()
+        with st.spinner("Making tags..."):
+            df['tags'] = df.apply(lambda x: make_tags(x["reviewText"]), axis=1)
+            df.to_csv("./data/AMAZON_FASHION_TAGS.csv", index=False)
+    
+    else:
+        st.warning("WARNING: Enter your OpenAI API key!")
+
+    
     # tqdm.pandas()
-    # df['tags'] = df.progress_apply(lambda x: make_tags(x["reviewText"]), axis=1)
-    # df.to_csv("./AMAZON_FASHION.json/OFFICIAL_AMAZON_FASHION_TAGS.csv", index=False)
+    
 
 
 

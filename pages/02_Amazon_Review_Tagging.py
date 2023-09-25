@@ -55,10 +55,37 @@ def str_to_list(strings):
         return []
 
 
+def file_loaded(file_name):
+    review_tags = pd.read_csv(file_name)
+    tag_column_df = review_tags['tags'].apply(str_to_list)
+    all_tags = {}
+    for tags in tag_column_df:
+        for tag in tags:
+            all_tags[tag] = all_tags.get(tag, 0) + 1
+    all_sorted = dict(sorted(all_tags.items(), key=lambda item: item[1]))
+    top_10 = []
+    for i in range(-1, -11, -1):
+        top_10.append(list(all_sorted)[i])
+    st.write(all_sorted)
+    return top_10
+
+
+def load_all_reviews(product, df):
+    same_products = df[df["tags"].apply(lambda x: product in x)]
+    for i,info in same_products.iterrows():
+        st.write(f"**Overall Score:** {info['overall']}")
+        st.write(f"**Product ID:** {info['asin']}")
+        st.write(f"**Reviewer Name:** {info['reviewerName']}")
+        st.write(f"**Review Text:**")
+        st.write(f"'{info['reviewText']}'")
+        st.write(f"**Tags:** {info['tags']}")
+        st.markdown('<hr>', unsafe_allow_html=True)
+
+
+
 if __name__ == "__main__":
     api_key_input = st.text_input("Enter OpenAI API Key", type="password", value=os.getenv("OPENAI_API_KEY") or st.session_state.get("OPENAI_API_KEY", ""))
     api_key_button = st.button("Add")
-    make_tag_button = st.button("Make Tags")
     if api_key_button:
         st.session_state["OPENAI_API_KEY"] = api_key_input
 
@@ -68,18 +95,22 @@ if __name__ == "__main__":
         df = load_data()
         file_path = "./data/AMAZON_FASHION_TAGS.csv"
         text = st.empty()
-        if make_tag_button:
-            if not os.path.exists(file_path):
-                text.text("File does not exist")
-                with st.spinner("Making tags..."):
-                    df['tags'] = df.apply(lambda x: make_tags(x["reviewText"], openai_api_key), axis=1)
-                df.to_csv(file_path, index=False)
-                text.text("File exists")
-                st.write(pd.read_csv(file_path))
-            else:
-                text.text("File exists")
-                st.write(pd.read_csv(file_path))
-    
+        if not os.path.exists(file_path):
+            with st.spinner("Making tags..."):
+                df['tags'] = df.apply(lambda x: make_tags(x["reviewText"], openai_api_key), axis=1)
+            df.to_csv(file_path, index=False)
+            text.text("File exists")
+        else:
+            text.text("File exists")
+            highest_10 = file_loaded(file_path)
+            selected_option = st.selectbox("Select a tag", highest_10)
+            st.write("Currently selected:", selected_option)
+            get_all_tags_btn = st.button("Get Tags")
+        if get_all_tags_btn:
+            load_all_reviews(selected_option, pd.read_csv(file_path))
+
+            
+            
     else:
         st.warning("WARNING: Enter your OpenAI API key!")
 
@@ -87,16 +118,11 @@ if __name__ == "__main__":
     # tqdm.pandas()
     
 
+    
 
-
-
-
-    # review_tags = pd.read_csv("./AMAZON_FASHION.json/OFFICIAL_AMAZON_FASHION_TAGS.csv")
-    # all_tags={}
-    # tag_column_df = review_tags['tags'].apply(str_to_list)
-    # # print(tag_column_df)
-    # for tags in tag_column_df:
-    #     for tag in tags:
-    #         all_tags[tag] = all_tags.get(tag, 0) + 1
-    # # print(all_tags)
-    # print(dict(sorted(all_tags.items(), key=lambda item: item[1])))
+    #     selected_option = st.selectbox("Select a product", options)
+    #     st.write("Currently selected:", selected_option)
+    #     question = st.text_input("Ask a question")
+    #     if st.button("Get Answer"):
+    #         # st.write(get_answer(selected_option, question, openai_api_key, prep_db(selected_option)))
+    #         st.write(prep_db(selected_option, openai_api_key))

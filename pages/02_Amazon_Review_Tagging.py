@@ -58,6 +58,7 @@ def str_to_list(strings):
 if __name__ == "__main__":
     api_key_input = st.text_input("Enter OpenAI API Key", type="password", value=os.getenv("OPENAI_API_KEY") or st.session_state.get("OPENAI_API_KEY", ""))
     api_key_button = st.button("Add")
+    make_tag_button = st.button("Make Tags")
     if api_key_button:
         st.session_state["OPENAI_API_KEY"] = api_key_input
 
@@ -65,9 +66,19 @@ if __name__ == "__main__":
     if openai_api_key:
         openai.api_key = openai_api_key
         df = load_data()
-        with st.spinner("Making tags..."):
-            df['tags'] = df.apply(lambda x: make_tags(x["reviewText"], openai_api_key), axis=1)
-            df.to_csv("./data/AMAZON_FASHION_TAGS.csv", index=False)
+        file_path = "./data/AMAZON_FASHION_TAGS.csv"
+        text = st.empty()
+        if make_tag_button:
+            if not os.path.exists(file_path):
+                text.text("File does not exist")
+                with st.spinner("Making tags..."):
+                    df['tags'] = df.apply(lambda x: make_tags(x["reviewText"], openai_api_key), axis=1)
+                df.to_csv(file_path, index=False)
+                text.text("File exists")
+                st.write(pd.read_csv(file_path))
+            else:
+                text.text("File exists")
+                st.write(pd.read_csv(file_path))
     
     else:
         st.warning("WARNING: Enter your OpenAI API key!")

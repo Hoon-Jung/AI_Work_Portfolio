@@ -19,7 +19,7 @@ from langchain.prompts.chat import (
 @st.cache_data
 def load_data():
 
-    data_path = "./data/AMAZON_FASHION.json"
+    data_path = "./data/AMAZON_FASHION_5.json"
 
     with open(data_path, "r") as f:
         data = [json.loads(line) for line in f]

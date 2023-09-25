@@ -66,7 +66,6 @@ def file_loaded(file_name):
     top_10 = []
     for i in range(-1, -11, -1):
         top_10.append(list(all_sorted)[i])
-    st.write(all_sorted)
     return top_10
 
 
@@ -93,7 +92,7 @@ if __name__ == "__main__":
     if openai_api_key:
         openai.api_key = openai_api_key
         df = load_data()
-        file_path = "./data/AMAZON_FASHION_TAGS.csv"
+        file_path = "./data/AMAZON_FASHION_TAGS_50.csv"
         text = st.empty()
         if not os.path.exists(file_path):
             with st.spinner("Making tags..."):

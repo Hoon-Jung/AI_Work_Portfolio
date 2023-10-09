@@ -40,21 +40,15 @@ def prep_db():
 
 
 
-def get_answer(product_id, question, apikey, selected_db):
+def get_answer(product_id, question, apikey):
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key=apikey)
 
-    # qa_chain = RetrievalQA.from_chain_type(llm, chain_type="stuff", retriever=selected_db.as_retriever())
-    # qa_chain = RetrievalQA.from_chain_type(llm)
-    # res = llm({"query": question})
+    load_db = FAISS.load_local(f"./data/db/{product_id}", HuggingFaceEmbeddings())
 
+    qa_chain = RetrievalQA.from_chain_type(llm, chain_type="stuff", retriever=load_db.as_retriever())
+    res = qa_chain({"query": question})
 
-    # prompt_template = PromptTemplate.from_template(
-    # "Tell me a funny joke about {content}."
-    # )
-    # chain = LLMChain(llm=llm, prompt=prompt_template)
-    # res = chain.run(content=question)
-
-    return selected_db
+    return res["result"]
 
 if __name__ == "__main__":
     st.title("Review Search Engine")
@@ -64,17 +58,16 @@ if __name__ == "__main__":
 
     if not os.path.exists("./data/db/B00007GDFV/index.pkl"):
         prep_db()
-        st.write("all done")
-    else:
-        st.write("exists")
-    # if api_key_button:
-    #     st.session_state["OPENAI_API_KEY"] = api_key_input
+        
+    if api_key_button:
+        st.session_state["OPENAI_API_KEY"] = api_key_input
 
-    # openai_api_key = st.session_state.get("OPENAI_API_KEY")
-    # if openai_api_key:
-    #     selected_option = st.selectbox("Select a product", options)
-    #     st.write("Currently selected:", selected_option)
-    #     question = st.text_input("Ask a question")
-    #     if st.button("Get Answer"):
-    #     # st.write(get_answer(selected_option, question, openai_api_key, prep_db(selected_option)))
-    #         st.write(prep_db(selected_option, openai_api_key))
+    openai_api_key = st.session_state.get("OPENAI_API_KEY")
+    if openai_api_key:
+        selected_option = st.selectbox("Select a product", options)
+        st.write("Currently selected:", selected_option)
+        question = st.text_input("Ask a question")
+        if st.button("Get Answer"):
+            st.write(get_answer(selected_option, question, openai_api_key))
+    else:
+        st.warning("WARNING: Enter your OpenAI API key!")

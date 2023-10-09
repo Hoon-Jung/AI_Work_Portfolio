@@ -105,8 +105,8 @@ if __name__ == "__main__":
             selected_option = st.selectbox("Select a tag", highest_10)
             st.write("Currently selected:", selected_option)
             get_all_tags_btn = st.button("Get Tags")
-        if get_all_tags_btn:
-            load_all_reviews(selected_option, pd.read_csv(file_path))
+            if get_all_tags_btn:
+                load_all_reviews(selected_option, pd.read_csv(file_path))
 
             
             

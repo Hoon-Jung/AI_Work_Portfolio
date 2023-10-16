@@ -16,6 +16,10 @@ from langchain.prompts.chat import (
 
 )
 
+import utils
+
+
+
 @st.cache_data
 def load_data():
 
@@ -29,9 +33,9 @@ def load_data():
     return df
 
 
-def make_tags(review, key):
+def make_tags(review):
 
-    chat = ChatOpenAI(openai_api_key=key)
+    chat = ChatOpenAI(openai_api_key=st.session_state.openai_api_key)
 
     template = "A tagging system that creates tags for use in an online shopping mall."
     system_message_prompt = SystemMessagePromptTemplate.from_template(template)
@@ -81,47 +85,26 @@ def load_all_reviews(product, df):
         st.markdown('<hr>', unsafe_allow_html=True)
 
 
+def generate_file(df, file_name):
+    with st.spinner("Making tags..."):
+        df['tags'] = df.apply(lambda x: make_tags(x["reviewText"]), axis=1)
+    df.to_csv(file_name, index=False)
+
+
 
 if __name__ == "__main__":
-    api_key_input = st.text_input("Enter OpenAI API Key", type="password", value=os.getenv("OPENAI_API_KEY") or st.session_state.get("OPENAI_API_KEY", ""))
-    api_key_button = st.button("Add")
-    if api_key_button:
-        st.session_state["OPENAI_API_KEY"] = api_key_input
+    utils.set_openai_api_key()
 
-    openai_api_key = st.session_state.get("OPENAI_API_KEY")
-    if openai_api_key:
-        openai.api_key = openai_api_key
-        df = load_data()
-        file_path = "./data/AMAZON_FASHION_TAGS_50.csv"
-        text = st.empty()
-        if not os.path.exists(file_path):
-            with st.spinner("Making tags..."):
-                df['tags'] = df.apply(lambda x: make_tags(x["reviewText"], openai_api_key), axis=1)
-            df.to_csv(file_path, index=False)
-            text.text("File exists")
-        else:
-            text.text("File exists")
-            highest_10 = file_loaded(file_path)
-            selected_option = st.selectbox("Select a tag", highest_10)
-            st.write("Currently selected:", selected_option)
-            get_all_tags_btn = st.button("Get Tags")
-            if get_all_tags_btn:
-                load_all_reviews(selected_option, pd.read_csv(file_path))
+    df = load_data()
+    file_path = "./data/AMAZON_FASHION_TAGS_50.csv"
+    text = st.empty()
+    if not os.path.exists(file_path):
+        generate_file(df, file_path)
 
-            
-            
-    else:
-        st.warning("WARNING: Enter your OpenAI API key!")
-
-    
-    # tqdm.pandas()
-    
-
-    
-
-    #     selected_option = st.selectbox("Select a product", options)
-    #     st.write("Currently selected:", selected_option)
-    #     question = st.text_input("Ask a question")
-    #     if st.button("Get Answer"):
-    #         # st.write(get_answer(selected_option, question, openai_api_key, prep_db(selected_option)))
-    #         st.write(prep_db(selected_option, openai_api_key))
+    highest_10 = file_loaded(file_path)
+   
+    selected_option = st.selectbox("Select a tag", highest_10)
+    st.write("Currently selected:", selected_option)
+    get_all_tags_btn = st.button("Get Tags")
+    if get_all_tags_btn:
+        load_all_reviews(selected_option, pd.read_csv(file_path))

@@ -3,7 +3,7 @@ import os
 
 def set_openai_api_key():
     openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password", value=os.getenv(
-            "OPENAI_API_KEY") or st.session_state.get("OPENAI_API_KEY", ""))
+            "OPENAI_API_KEY") or st.session_state.get("openai_api_key", ""))
     if openai_api_key:
         st.session_state.openai_api_key = openai_api_key
     else:

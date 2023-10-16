@@ -10,10 +10,7 @@ if __name__ == "__main__":
     st.set_page_config(page_title="Product Description Generator")
     st.title("Product Description Generator")
     aidesc = ""
-    st.write(st.session_state)
     utils.set_openai_api_key()
-    st.write("utils went")
-    st.write(st.session_state)
     desc = st.text_input("Product Information", placeholder="Enter a short product description")
     aidescription = st.empty()
 

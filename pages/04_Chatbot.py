@@ -35,6 +35,7 @@ def config_openai(p):
 
 if __name__ == "__main__":
     utils.set_openai_api_key()
+    st.title("Simple AI Chatbot")
     
     if "msg" not in st.session_state:
         st.session_state.msg = []

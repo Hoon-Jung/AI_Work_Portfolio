@@ -95,6 +95,8 @@ def generate_file(df, file_name):
 if __name__ == "__main__":
     utils.set_openai_api_key()
 
+    st.title("Amazon Review Tagging")
+
     df = load_data()
     file_path = "./data/AMAZON_FASHION_TAGS_50.csv"
     text = st.empty()

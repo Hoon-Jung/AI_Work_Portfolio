@@ -20,7 +20,7 @@ def clear():
 
 def file_selector():
         folder_path = os.path.join(".", "data", "db", "document_search_folder")
-        filenames = os.listdir(folder_path)
+        filenames = os.listdir(folder_path) #when making this make an exception case for when it is empty
         filenames.append("Upload a file")
         selected_filename = st.selectbox('Select a file', filenames, on_change=clear)
         

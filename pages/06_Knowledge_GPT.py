@@ -39,7 +39,7 @@ def config_openai(db_name):
     
     retriever = selected_db.as_retriever()
 
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, streaming=True)
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=st.session_state.openai_api_key, temperature=0, streaming=True)
 
     condense_q_system_prompt = """Given a chat history and the latest user question \
     which might reference the chat history, formulate a standalone question \

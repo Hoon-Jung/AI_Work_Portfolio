@@ -21,7 +21,7 @@ def clear():
 def file_selector():
         folder_path = os.path.join(".", "data", "db", "document_search_folder")
         try:
-            filenames = os.listdir(folder_path) #when making this make an exception case for when it is empty
+            filenames = os.listdir(folder_path)
         except:
             os.mkdir(folder_path)
             filenames = os.listdir(folder_path)
